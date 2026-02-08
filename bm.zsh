@@ -26,8 +26,12 @@ bm() {
       target="$(cd "$target" 2>/dev/null && pwd || realpath "$target" 2>/dev/null || echo "$target")"
       # Remove existing entry with same name, then add
       if [[ -f "$BM_FILE" ]]; then
-        local tmp="$(grep -v "^${name}=" "$BM_FILE")"
-        echo "$tmp" > "$BM_FILE"
+        local tmp=""
+        while IFS= read -r line; do
+          [[ "$line" == "${name}="* ]] && continue
+          tmp+="${line}"$'\n'
+        done < "$BM_FILE"
+        printf '%s' "$tmp" > "$BM_FILE"
       fi
       echo "${name}=${target}" >> "$BM_FILE"
       echo "Saved: ${name} -> ${target}"
@@ -68,12 +72,22 @@ bm() {
         echo "Usage: bm rm <name>"
         return 1
       fi
-      if [[ ! -f "$BM_FILE" ]] || ! grep -q "^${name}=" "$BM_FILE"; then
+      local found=0
+      local tmp=""
+      if [[ -f "$BM_FILE" ]]; then
+        while IFS= read -r line; do
+          if [[ "$line" == "${name}="* ]]; then
+            found=1
+          else
+            tmp+="${line}"$'\n'
+          fi
+        done < "$BM_FILE"
+      fi
+      if (( ! found )); then
         echo "Bookmark '${name}' not found"
         return 1
       fi
-      local tmp="$(grep -v "^${name}=" "$BM_FILE")"
-      echo "$tmp" > "$BM_FILE"
+      printf '%s' "$tmp" > "$BM_FILE"
       echo "Removed: ${name}"
       ;;
 
@@ -112,7 +126,13 @@ bm() {
 _bm_get() {
   local name="$1"
   [[ ! -f "$BM_FILE" ]] && return 1
-  grep "^${name}=" "$BM_FILE" | head -1 | cut -d'=' -f2-
+  while IFS='=' read -r key val; do
+    if [[ "$key" == "$name" ]]; then
+      echo "$val"
+      return 0
+    fi
+  done < "$BM_FILE"
+  return 1
 }
 
 # Tab completion
@@ -126,7 +146,9 @@ _bm_completions() {
       cd|rm|path)
         if [[ -f "$BM_FILE" ]]; then
           local -a names
-          names=(${(f)"$(cut -d'=' -f1 "$BM_FILE" | grep -v '^$')"})
+          while IFS='=' read -r key _; do
+            [[ -n "$key" ]] && names+=("$key")
+          done < "$BM_FILE"
           _describe 'bookmark' names
         fi
         ;;
