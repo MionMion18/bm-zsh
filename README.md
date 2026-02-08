@@ -2,6 +2,11 @@
 
 Simple path bookmark manager for zsh.
 
+## Requirements
+
+- zsh 5.0+
+- macOS / Linux
+
 ## Install
 
 ```bash
