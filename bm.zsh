@@ -54,7 +54,7 @@ bm() {
       fi
       while IFS='=' read -r name path; do
         [[ -z "$name" ]] && continue
-        if [[ -d "$path" ]]; then
+        if [[ -e "$path" ]]; then
           printf "  %-15s %s\n" "$name" "$path"
         else
           printf "  %-15s %s (missing)\n" "$name" "$path"
