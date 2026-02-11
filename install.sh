@@ -10,17 +10,9 @@ SOURCE_LINE='source ~/.local/lib/zsh/bm.zsh'
 # Create directory
 mkdir -p "$LIB_DIR"
 
-# Create symlink
-if [ -L "$LINK_PATH" ]; then
-  echo "Updating existing symlink..."
-  rm "$LINK_PATH"
-elif [ -e "$LINK_PATH" ]; then
-  echo "Error: $LINK_PATH already exists and is not a symlink"
-  exit 1
-fi
-
-ln -s "$SOURCE_PATH" "$LINK_PATH"
-echo "Linked: $LINK_PATH -> $SOURCE_PATH"
+# Copy file
+cp "$SOURCE_PATH" "$LINK_PATH"
+echo "Copied: $SOURCE_PATH -> $LINK_PATH"
 
 # Add source line to .zshrc if not present
 if ! grep -qF "$SOURCE_LINE" "$ZSHRC" 2>/dev/null; then
