@@ -40,3 +40,5 @@ cp file.txt $(bm path proj)/
 rm ~/.local/lib/zsh/bm.zsh
 # Remove "source ~/.local/lib/zsh/bm.zsh" from ~/.zshrc
 ```
+
+あああ
